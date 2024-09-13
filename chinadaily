@@ -1,0 +1,79 @@
+url = "https://www.chinadaily.com.cn/"
+
+
+import requests
+from lxml import etree
+reponse = requests.get(url)
+data = etree.HTML(reponse.text)
+
+
+top = data.xpath("//div[@class='tMain']//a")
+China = data.xpath("//div[@class='cmLBox'][1]//a")
+business = data.xpath("//div[@class='cmLBox'][2]//a")
+Culture = data.xpath("//div[@class='cmLBox'][3]//a")
+World = data.xpath("//div[@class='cmLBox'][4]//a")
+Lifestyle = data.xpath("//div[@class='cmLBox'][5]//a")
+Regional = data.xpath("//div[@class='cmLBox'][6]//a")
+Travel = data.xpath("//div[@class='cmLBox'][8]//a")
+Sports = data.xpath("//div[@class='cmLBox'][9]//a")
+Opinion = data.xpath("//div[@class='cmLBox'][10]//a")
+VIDEO = data.xpath("//div[@class='cmLBox pc-watch']//a")
+
+
+top_data = [element.text for element in top if element.text is not None]  # 去除 None
+top_data_string = "\n".join(top_data)
+
+
+China_data = [element.text for element in China if element.text is not None]  # 去除 None
+China_data_string = "\n".join(China_data)
+
+
+business_data = [element.text for element in business if element.text is not None]  # 去除 None
+business_data_string = "\n".join(business_data)
+
+
+Culture_data = [element.text for element in Culture if element.text is not None]  # 去除 None
+Culture_data_string = "\n".join(Culture_data)
+
+
+World_data = [element.text for element in World if element.text is not None]  # 去除 None
+World_data_string = "\n".join(World_data)
+
+
+Lifestyle_data = [element.text for element in Lifestyle if element.text is not None]  # 去除 None
+Lifestyle_data_string = "\n".join(Lifestyle_data)
+
+
+Regional_data = [element.text for element in Regional if element.text is not None]  # 去除 None
+Regional_data_string = "\n".join(Regional_data)
+
+
+Travel_data = [element.text for element in Travel if element.text is not None]  # 去除 None
+Travel_data_string = "\n".join(Travel_data)
+
+
+Sports_data = [element.text for element in Sports if element.text is not None]  # 去除 None
+Sports_data_string = "\n".join(Sports_data)
+
+
+Opinion_data = [element.text for element in Opinion if element.text is not None]  # 去除 None
+Opinion_data_string = "\n".join(Opinion_data)
+
+
+VIDEO_data = [element.text for element in VIDEO if element.text is not None]  # 去除 None
+VIDEO_data_string = "\n".join(VIDEO_data)
+
+
+
+
+title=["top","China","business","Culture","World","Lifestyle","Regional","Travel,Food","Sports","Opinion","VIDEO"]
+from openpyxl import Workbook  # 导入 openpyxl
+
+
+wb = Workbook()
+ws = wb.active
+ws.append(title)
+ws.append([top_data_string,China_data_string,business_data_string,Culture_data_string,World_data_string,Lifestyle_data_string,Regional_data_string,Travel_data_string,Sports_data_string,Opinion_data_string,VIDEO_data_string
+])
+wb.save('result.xlsx')
+
