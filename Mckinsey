@@ -1,0 +1,122 @@
+from bs4 import BeautifulSoup
+import requests
+import openpyxl
+
+
+# Initialize data dictionary
+detail = {
+   "service_offerings": [],
+   "case_studies": [],
+   "client_testimonials": [],
+   "thought_leadership": [],
+   "market_insight": []
+}
+
+
+# Scrape data section
+service_url = "https://www.mckinsey.com/capabilities/operations/how-we-help-clients/service-operations"
+service_page = requests.get(service_url)
+soup = BeautifulSoup(service_page.text, "html.parser")
+
+
+# Extract service offerings section
+service_section = soup.find_all('h5', class_="mdc-c-heading___0fM1W_34c79a7")
+for service in service_section:
+   detail["service_offerings"].append(service.get_text().strip())
+
+
+# Case studies section
+case_url = "https://www.mckinsey.com/about-us/case-studies"
+case_page = requests.get(case_url)
+case_soup = BeautifulSoup(case_page.text, "html.parser")
+case_studies = case_soup.find_all("h5", class_="mdc-c-heading___0fM1W_34c79a7")
+for case in case_studies:
+   detail["case_studies"].append(case.get_text().strip())
+
+
+# Client testimonials section, including title and description
+case_url = "https://www.mckinsey.com/capabilities/growth-marketing-and-sales/how-we-help-clients/impact-stories"
+case_page = requests.get(case_url)
+case_soup = BeautifulSoup(case_page.text, "html.parser")
+case_studies = case_soup.find_all("h5", class_="mdc-c-heading___0fM1W_34c79a7")
+for case in case_studies:
+   # Extract testimonial title
+   heading = case.get_text().strip()
+
+
+   # Find the corresponding description for the title
+   description_div = case.find_next("div", class_="mck-u-links-inline mck-c-generic-item__description")
+   if description_div:
+       description = description_div.get_text().strip()
+   else:
+       description = "No description available"
+
+
+   # Store the title and description in the dictionary
+   detail["client_testimonials"].append(f"{heading}: {description}")
+
+
+# Thought leadership section
+case_url = "https://www.mckinsey.com/about-us/overview/our-leadership"
+case_page = requests.get(case_url)
+case_soup = BeautifulSoup(case_page.text, "html.parser")
+case_studies = case_soup.find_all("h5", class_="mdc-c-heading___0fM1W_34c79a7")
+for case in case_studies:
+   # Extract testimonial title
+   heading = case.get_text().strip()
+
+
+   # Find the corresponding description for the title
+   description_div = case.find_next("div", class_="mck-u-links-inline mck-c-generic-item__description")
+   if description_div:
+       description = description_div.get_text().strip()
+   else:
+       description = "No description available"
+
+
+   # Store the title and description in the dictionary
+   detail["thought_leadership"].append(f"{heading}: {description}")
+
+
+# Market insight section, extract paragraph data
+insight_url = "https://www.mckinsey.com/capabilities/growth-marketing-and-sales/how-we-help-clients/insights-and-analytics"
+insight_page = requests.get(insight_url)
+insight_soup = BeautifulSoup(insight_page.text, "html.parser")
+
+
+# Find all paragraphs and extract the text
+paragraphs = insight_soup.find_all("p")
+for paragraph in paragraphs:
+   detail["market_insight"].append(paragraph.get_text().strip())
+
+
+# Create Excel file
+wb = openpyxl.Workbook()
+sheet = wb.active
+sheet.title = "McKinsey"
+
+
+# Write titles and data to Excel
+sheet.cell(row=1, column=1).value = "Service Offerings"
+sheet.cell(row=2, column=1).value = ', '.join(detail["service_offerings"])
+
+
+sheet.cell(row=1, column=2).value = "Case Studies"
+sheet.cell(row=2, column=2).value = ', '.join(detail["case_studies"])
+
+
+sheet.cell(row=1, column=3).value = "Client Testimonials"
+sheet.cell(row=2, column=3).value = '\n'.join(detail["client_testimonials"])  # Use newline to separate different testimonials
+
+
+sheet.cell(row=1, column=4).value = "Thought Leadership"
+sheet.cell(row=2, column=4).value = '\n'.join(detail["thought_leadership"])
+
+
+sheet.cell(row=1, column=5).value = "Market Insight"
+sheet.cell(row=2, column=5).value = ', '.join(detail["market_insight"])
+
+
+# Save as Excel file
+wb.save("McKinsey_Data.xlsx")
+
