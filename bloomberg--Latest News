@@ -35,8 +35,8 @@ def parse_content(html):
    
     # 使用XPath选择器
     title_xpath = "//div[@class='Headline_phoenix__tgVV3 Headline_large__3__hG StoryBlock_storyBlockHeadline__cFDyW']/span"
-    left_xpath = "//div[@class='Headline_phoenix__tgVV3 Headline_small__xXOnW StoryBlock_storyBlockHeadline__cFDyW']/span"
-    right_xpath = "//div[@class='Headline_phoenix__tgVV3 Headline_large__3__hG']/span"
+    left_xpath = "//div[@class='Headline_phoenix__tgVV3 Headline_medium__fp0ty StoryBlock_storyBlockHeadline__cFDyW']/span"
+    right_xpath = "//div[@class='Headline_phoenix__tgVV3 Headline_medium__fp0ty StoryBlock_storyBlockHeadline__cFDyW']/span"
 
 
     """
@@ -104,7 +104,7 @@ def write_to_excel(data):
 
 
 def main():
-    url = "https://www.bloomberg.com/markets"  # 替换为您要爬取的实际URL
+    url = "https://www.bloomberg.com/"  # 替换为您要爬取的实际URL
     html = fetch_webpage(url)
    
     if html:
