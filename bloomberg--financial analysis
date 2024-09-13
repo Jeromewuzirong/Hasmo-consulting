@@ -1,0 +1,121 @@
+import requests
+from lxml import etree
+from openpyxl import Workbook, load_workbook
+from datetime import datetime
+import os
+
+
+"""
+构造请求包
+"""
+def fetch_webpage(url):
+    """
+    设置请求头 ，因为很多网站都会默认不允许程序访问，就会判断这个请求头（user-agent）字段。
+    """
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    }
+    """
+    尝试发包获取结果
+    """
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        return response.content
+    except requests.RequestException as e:
+        print(f"获取网页时发生错误: {e}")
+        return None
+
+
+def parse_content(html):
+    """
+    将获取到的类容使用etree加载 方便找到需要的字段
+    """
+    tree = etree.HTML(html)
+   
+    # 使用XPath选择器
+    title_xpath = "//div[@class='Headline_phoenix__tgVV3 Headline_large__3__hG StoryBlock_storyBlockHeadline__cFDyW']/span"
+    left_xpath = "//div[@class='Headline_phoenix__tgVV3 Headline_large__3__hG']/span"
+    right_xpath = "//h3[@class='SectionFrontHeaderBrand_title__ITyZi']"
+
+
+    """
+    通过xpath获取到对应字段的节点， 如果不明白这个title具体是什么 可以尝试打印
+    """
+    title = tree.xpath(title_xpath)
+    left_content = tree.xpath(left_xpath)
+    right_content = tree.xpath(right_xpath)
+    print(left_content)
+    data_2 = ""
+    """
+    拼接所获得的信息，然后存储到data_2中
+    """
+    for item in left_content:
+        data_2 += item.text.strip() + '\n'
+    for item in right_content:
+        data_2 += item.text.strip() + '\n'
+    return [title[0].text.strip(), data_2]
+
+
+def write_to_excel(data):
+    print(data)
+    """
+    定义文件路径
+    """
+    file_path = "./1.xlsx"
+   
+    """
+    判断文件是否存在，存在则加载，不存在则创建
+    """
+    if os.path.exists(file_path):
+        wb = load_workbook(file_path)
+        ws = wb.active
+    else:
+        wb = Workbook()
+        ws = wb.active
+        """
+        设置文件标题（sheet）
+        """
+        ws.title = "爬取数据"
+        """
+        以list的形式写入标题
+        """
+        t = "Latest news articles, market reports, financial analysis, and global economic trends"
+        ws.append(t.split(","))
+   
+    """
+    找到第二行第一个空白的单元格
+    """
+    row = 2
+    col = 1
+    while ws.cell(row=row, column=col).value is not None:
+        col += 1
+   
+    """
+    在第二行的空白单元格中插入新数据
+    """
+    data = f"{data[0]}{data[1]}"
+    ws.cell(row=row, column=col, value=data)
+   
+    """
+    保存文件
+    """
+    wb.save(file_path)
+
+
+def main():
+    url = "https://www.bloomberg.com/industries/finance"  # 替换为您要爬取的实际URL
+    html = fetch_webpage(url)
+   
+    if html:
+        content = parse_content(html)
+        write_to_excel(content)
+    else:
+        print("无法获取网页内容")
+
+
+if __name__ == "__main__":
+    main()
+
+
+
