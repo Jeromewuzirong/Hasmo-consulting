@@ -1,0 +1,103 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+import os
+from openpyxl import Workbook, load_workbook
+
+
+
+
+def simple_selenium_example(url):
+   # Initialize Chrome driver using WebDriver Manager
+   driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+
+
+   scraped_data = []  # List to store scraped data
+
+
+   try:
+       driver.get(url)  # Open the specified URL
+       elements = driver.find_elements(By.XPATH,
+                                       "//div[@class='itemContent__text']")  # Match elements by XPath
+
+
+       for element in elements:
+           scraped_data.append(element.text)  # Append the element text to the list
+   finally:
+       driver.quit()  # Close the browser
+
+
+   # Concatenate the scraped data into a single string
+   concatenated_data = ", ".join(scraped_data)
+   return concatenated_data
+
+
+
+
+def write_to_excel(data):
+   """
+   Define the file path
+   """
+   file_path = "./1.xlsx"
+
+
+   """
+   Check if the file exists, load if it does, create a new one if not
+   """
+   if os.path.exists(file_path):
+       wb = load_workbook(file_path)
+       ws = wb.active
+   else:
+       wb = Workbook()
+       ws = wb.active
+       """
+       Set sheet title
+       """
+       ws.title = "爬取数据"
+       """
+       Write the header row
+       """
+       t = "Market research reports, industry analysis, statistics, trends"
+       ws.append(t.split(","))
+
+
+   """
+   Find the next available column in the second row to insert data
+   """
+   row = 2
+   col = 1
+   while ws.cell(row=row, column=col).value is not None:
+       col += 1
+
+
+   """
+   Insert the new data into the available column
+   """
+   ws.cell(row=row, column=col, value=data)
+
+
+   """
+   Save the file
+   """
+   wb.save(file_path)
+
+
+
+
+def main():
+   url = "https://www.statista.com/search/?q=industry+analysis&p=1"  # Example URL
+   scraped_content = simple_selenium_example(url)
+
+
+   if scraped_content:
+       write_to_excel(scraped_content)
+   else:
+       print("Unable to scrape any data from the webpage.")
+
+
+
+
+if __name__ == "__main__":
+   main()
+
